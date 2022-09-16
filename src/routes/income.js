@@ -1,4 +1,4 @@
-const guard = require('../guard/guard');
+const guard = require('../sentinel/guard');
 const express = require('express');
 const router = express.Router();
 
