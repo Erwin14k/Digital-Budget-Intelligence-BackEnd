@@ -8,8 +8,14 @@ module.exports.registerPerson = async (req, res, next) => {
     try {
         const password_hash = await bcryptjs.hash(password, 12);
         const args = { username, email, password: password_hash };
-        await Person.register(args);
-        res.status(200).json({ message: 'Person created!' });
+        const { rows } = await Person.existEmail({email:email});
+        if(rows.length===0){
+            await Person.register(args);
+            res.status(200).json({ message: 'Person created!' });
+        }else{
+            res.status(409).json({ message: 'Email, already used!' });
+        }
+        
     } catch (error) {
         res.status(400).json({ message: error });
     }
@@ -31,9 +37,9 @@ module.exports.loginPerson = async (req, res, next) => {
                 return res.status(200).json({ token, data });
             }
         }
-        res.status(400).json({ message: 'Error: email or password not valid' });
+        res.status(409).json({ message: 'Error: email or password not valid' });
     } catch (error) {
-    res.status(400).json({ message: error });
+        res.status(400).json({ message: error });
     }
 };
 

@@ -20,6 +20,7 @@ module.exports.getAccounts = async (req, res, next) => {
     };
     try {
         const { rows } = await Account.fetchAll(args);
+        //console.log(rows);
         res.status(200).json({ data: rows });
     } catch (error) {
         res.status(400).json({ message: error });

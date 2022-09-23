@@ -34,14 +34,34 @@ module.exports.fetchAll = ({ person }) => {
 };
 
 module.exports.updateExpense = ({ ammount, account }) => {
+    const convertedAccount=parseInt(account);
     const convertedAmmount=parseFloat(ammount);
     //Update Account Ammount
-    const bindings = {convertedAmmount,account};
+    const bindings = {convertedAmmount,convertedAccount};
     const SQL_UPDATE_ACCOUNT = `UPDATE ACCOUNT
-                                SET AMMOUNT=AMMOUNT-:convertedAmmount WHERE ACCOUNT=:account`;
+                                SET AMMOUNT=AMMOUNT-:convertedAmmount WHERE ACCOUNT=:convertedAccount`;
     return pool(SQL_UPDATE_ACCOUNT, bindings, { autoCommit: true });
 };
 
+module.exports.updateTransferExpense = ({ ammount, origin }) => {
+    const convertedAmmount=parseFloat(ammount);
+    const convertedAccount=parseInt(origin);
+    //Update Account Ammount
+    const bindings = {convertedAmmount,convertedAccount};
+    const SQL_UPDATE_ACCOUNT = `UPDATE ACCOUNT
+                                SET AMMOUNT=AMMOUNT-:convertedAmmount WHERE ACCOUNT=:convertedAccount`;
+    return pool(SQL_UPDATE_ACCOUNT, bindings, { autoCommit: true });
+};
+
+module.exports.updateTransferIncome = ({ ammount, destiny }) => {
+    const convertedAmmount=parseFloat(ammount);
+    const convertedAccount=parseInt(destiny);
+    //Update Account Ammount
+    const bindings = {convertedAmmount,convertedAccount};
+    const SQL_UPDATE_ACCOUNT = `UPDATE ACCOUNT
+                                SET AMMOUNT=AMMOUNT+:convertedAmmount WHERE ACCOUNT=:convertedAccount`;
+    return pool(SQL_UPDATE_ACCOUNT, bindings, { autoCommit: true });
+};
 module.exports.updateIncome = ({ ammount, account }) => {
     const convertedAmmount=parseFloat(ammount);
     //Update Account Ammount
@@ -49,4 +69,20 @@ module.exports.updateIncome = ({ ammount, account }) => {
     const SQL_UPDATE_ACCOUNT = `UPDATE ACCOUNT
                                 SET AMMOUNT=AMMOUNT+:convertedAmmount WHERE ACCOUNT=:account`;
     return pool(SQL_UPDATE_ACCOUNT, bindings, { autoCommit: true });
+};
+
+
+module.exports.findById = ({ person, account }) => {
+    const personConverted=parseInt(person);
+    const accountConverted=parseInt(account);
+    const bindings = { personConverted, accountConverted };
+    const SQL_SELECT_CATEGORY = `SELECT 
+                                    ACCOUNT AS "account", 
+                                    CURRENCY AS "currency",
+                                    AMMOUNT AS "ammount", 
+                                    ADD_DATE AS "add_date"
+                                    FROM ACCOUNT
+                                    WHERE PERSON = :personConverted
+                                    AND ACCOUNT = :accountConverted`;
+    return pool(SQL_SELECT_CATEGORY, bindings);
 };

@@ -6,7 +6,14 @@ module.exports.register = ({ username, email, password }) => {
                             VALUES(SQ_PERSON.NEXTVAL, :username, :email, :password)`;
     return pool(SQL_INSERT_PERSON, bindings, { autoCommit: true });
 };
-
+module.exports.existEmail = ({ email }) => {
+    const bindings = { email };
+    const SQL_SELECT_CATEGORY = `SELECT 
+                                    Person AS "person"
+                                    FROM PERSON
+                                    WHERE EMAIL = :email`;
+    return pool(SQL_SELECT_CATEGORY, bindings);
+};
 module.exports.login = ({ email }) => {
     const bindings = { email };
     const SQL_SELECT_PERSON = `SELECT 
