@@ -1,14 +1,19 @@
-const Category = require('../models/income');
-
+const Income = require('../models/income');
+const Account = require('../models/account');
 module.exports.createIncome = async (req, res, next) => {
     const args = {
         person: req.person.person,
-        income: req.body.income,
+        category: req.body.category,
         ammount: req.body.ammount,
         account: req.body.account,
     };
+    const updateArgs={
+        ammount: req.body.ammount,
+        account: req.body.account,
+    }
     try {
-        await Category.create(args);
+        await Account.updateIncome(updateArgs);
+        await Income.create(args);
         res.status(200).json({ message: 'Income created!' });
     } catch (error) {
         res.status(400).json({ message: error });

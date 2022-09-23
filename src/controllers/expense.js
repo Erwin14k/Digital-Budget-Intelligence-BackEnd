@@ -1,14 +1,20 @@
-const Category = require('../models/expense');
+const Expense = require('../models/expense');
+const Account = require('../models/account');
 
 module.exports.createExpense = async (req, res, next) => {
     const args = {
         person: req.person.person,
-        expense: req.body.expense,
+        category: req.body.category,
         ammount: req.body.ammount,
         account: req.body.account,
     };
+    const updateArgs={
+        ammount: req.body.ammount,
+        account: req.body.account,
+    }
     try {
-        await Category.create(args);
+        await Account.updateExpense(updateArgs);
+        await Expense.create(args);
         res.status(200).json({ message: 'Expense created!' });
     } catch (error) {
         res.status(400).json({ message: error });

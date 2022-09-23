@@ -17,6 +17,7 @@ module.exports.registerPerson = async (req, res, next) => {
 
 module.exports.loginPerson = async (req, res, next) => {
     const { email, password } = req.body;
+    //console.log(email);
     try {
         const args = { email };
         const { rows } = await Person.login(args);
