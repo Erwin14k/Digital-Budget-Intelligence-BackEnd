@@ -43,8 +43,8 @@ module.exports.updateExpense = ({ ammount, account }) => {
     return pool(SQL_UPDATE_ACCOUNT, bindings, { autoCommit: true });
 };
 
-module.exports.updateTransferExpense = ({ ammount, origin }) => {
-    const convertedAmmount=parseFloat(ammount);
+module.exports.updateTransferExpense = ({ originalAmmount, origin }) => {
+    const convertedAmmount=parseFloat(originalAmmount);
     const convertedAccount=parseInt(origin);
     //Update Account Ammount
     const bindings = {convertedAmmount,convertedAccount};
