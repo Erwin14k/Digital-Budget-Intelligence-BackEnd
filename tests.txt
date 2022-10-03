@@ -1,5 +1,0 @@
---RUN DB
-docker run -p 1521:1521 -d -e ORACLE_PASSWORD=adminpass -e APP_USER=appuser -e APP_USER_PASSWORD=digitalbudget -v oracle-volume:/opt/oracle/oradata -v "/home/erwin14k/Documentos/GitHub/Digital-Budget-Intelligence-BackEnd/db:/container-entrypoint-initdb.d" gvenzl/oracle-xe:21.3.0
---RUN BackEnd
-docker run -p 8500:8500 -d -e SERVER_PORT=8500 -e ORACLE_USER=appuser -e ORACLE_PASS=digitalbudget -e ORACLE_CONNSTR=172.17.0.2:1521/xepdb1 full-back:0.1.0
-

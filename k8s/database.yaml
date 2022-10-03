@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-init-cm
+data:
+  init.sql: |
+    ALTER SESSION SET CONTAINER=XEPDB1;
+    --PERSON TABLE
+    CREATE TABLE APPUSER.PERSON (
+      PERSON NUMBER,
+      PERSON_TOKEN VARCHAR2(1000) NOT NULL,
+      USERNAME VARCHAR2(100) NOT NULL,
+      EMAIL VARCHAR2(100) NOT NULL UNIQUE,
+      PASSWORD VARCHAR2(100) NOT NULL,
+      ADD_DATE DATE DEFAULT SYSDATE,
+      PRIMARY KEY(PERSON)
+    );
+    CREATE SEQUENCE APPUSER.SQ_PERSON NOCACHE;
+
+    --ACCOUNT TABLE
+    CREATE TABLE APPUSER.ACCOUNT (
+      ACCOUNT NUMBER,
+      CURRENCY VARCHAR2(100) NOT NULL,
+      AMMOUNT NUMBER(12,6) NOT NULL,
+      PERSON NUMBER NOT NULL,
+      ADD_DATE DATE DEFAULT SYSDATE,
+      PRIMARY KEY (ACCOUNT),
+      FOREIGN KEY(PERSON) REFERENCES APPUSER.PERSON(PERSON)
+    );
+    CREATE SEQUENCE APPUSER.SQ_ACCOUNT NOCACHE;
+
+    --EXPENSE TABLE
+    CREATE TABLE APPUSER.EXPENSE (
+      EXPENSE NUMBER,
+      CATEGORY VARCHAR2(100) NOT NULL,
+      AMMOUNT NUMBER(12,6) NOT NULL,
+      PERSON NUMBER NOT NULL,
+      ACCOUNT NUMBER NOT NULL,
+      ADD_DATE DATE DEFAULT SYSDATE,
+      PRIMARY KEY (EXPENSE),
+      FOREIGN KEY(PERSON) REFERENCES APPUSER.PERSON(PERSON),
+      FOREIGN KEY(ACCOUNT) REFERENCES APPUSER.ACCOUNT(ACCOUNT)
+    );
+    CREATE SEQUENCE APPUSER.SQ_EXPENSE NOCACHE;
+
+    --INCOME TABLE
+    CREATE TABLE APPUSER.INCOME (
+      INCOME NUMBER,
+      CATEGORY VARCHAR2(100) NOT NULL,
+      AMMOUNT NUMBER(12,6) NOT NULL,
+      PERSON NUMBER NOT NULL,
+      ACCOUNT NUMBER NOT NULL,
+      ADD_DATE DATE DEFAULT SYSDATE,
+      PRIMARY KEY (INCOME),
+      FOREIGN KEY(PERSON) REFERENCES APPUSER.PERSON(PERSON),
+      FOREIGN KEY(ACCOUNT) REFERENCES APPUSER.ACCOUNT(ACCOUNT)
+    );
+    CREATE SEQUENCE APPUSER.SQ_INCOME NOCACHE;
+
+    -- CREATE FUNCTION
+    CREATE OR REPLACE FUNCTION APPUSER.API_TOKEN(PSECRET VARCHAR2) RETURN VARCHAR2
+    IS VRESULT VARCHAR2(4000);
+    BEGIN
+      SELECT UTL_RAW.CAST_TO_VARCHAR2(UTL_I18N.STRING_TO_RAW(STANDARD_HASH(PSECRET, 'MD5'), 'AL32UTF8')) INTO VRESULT from dual;
+      RETURN VRESULT;
+    END API_TOKEN;
+    /
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-oracle-pv-claim
+  labels:
+    app: db-oracle
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-oracle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-oracle
+  template:
+    metadata:
+      labels:
+        app: db-oracle
+    spec:
+      securityContext:
+        runAsUser: 54321 # Oracle User
+        runAsGroup: 54321 # Oinstall group
+        fsGroup: 54321 # Oinstall group
+      volumes:
+        - name: db-init-volume
+          configMap:
+            name: db-init-cm
+        - name: db-oracle-persistent-storage
+          persistentVolumeClaim:
+            claimName: db-oracle-pv-claim
+      containers:
+        - name: db-oracle
+          image: gvenzl/oracle-xe
+          env:
+            - name: ORACLE_PASSWORD
+              value: "adminpass"
+            - name: APP_USER
+              value: "appuser"
+            - name: APP_USER_PASSWORD
+              value: "digitalbudget"
+          resources:
+            limits:
+              memory: "3000Mi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 1521
+          volumeMounts:
+            - name: db-init-volume
+              mountPath: /container-entrypoint-initdb.d
+            - name: db-oracle-persistent-storage
+              mountPath: /opt/oracle/oradata
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-oracle
+spec:
+  type: ClusterIP
+  selector:
+    app: db-oracle
+  ports:
+    - port: 1521
+      targetPort: 1521

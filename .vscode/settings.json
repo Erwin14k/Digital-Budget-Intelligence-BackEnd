@@ -1,0 +1,5 @@
+{
+  "yaml.schemas": {
+    "kubernetes://schema/apps/v1%40deployment": "file:///home/erwin14k/Documentos/GitHub/Digital-Budget-Intelligence-BackEnd/k8s/database.yaml"
+  }
+}

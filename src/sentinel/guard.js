@@ -1,8 +1,6 @@
-const Guard = require('../models/guard');
-const { auth } = require('../config/config');
-const jwt = require('jsonwebtoken');
+const Guard = require("../models/guard");
 
-module.exports = async (req, res, next) => {
+/*module.exports = async (req, res, next) => {
     const header_authorization = req.get('Authorization');
     if (header_authorization) {
         const token = header_authorization.split(' ')[1];
@@ -27,4 +25,31 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({
         message: 'Unauthorized',
     });
+};*/
+
+const guard = async (req, res, next) => {
+  if (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith("Bearer ")
+  ) {
+    return res.status(403).json({
+      message: "Unauthorized",
+    });
+  }
+  const person_token = req.headers.authorization.split("Bearer ")[1];
+  try {
+    const args = { person_token };
+    const { rows } = await Guard.verifyPersonToken(args);
+    if (rows.length > 0) {
+      req.person = rows[0];
+      return next();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return res.status(403).json({
+    message: "Unauthorized",
+  });
 };
+
+module.exports = guard;

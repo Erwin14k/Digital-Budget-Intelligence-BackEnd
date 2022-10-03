@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-back
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-back
+  template:
+    metadata:
+      labels:
+        app: app-back
+    spec:
+      containers:
+        - name: app-back
+          image: erwin14k/full-back:0.1.0
+          env:
+            - name: SERVER_PORT
+              value: "8500"
+            - name: ORACLE_USER
+              value: "appuser"
+            - name: ORACLE_PASS
+              value: "digitalbudget"
+            - name: ORACLE_CONNSTR
+              value: "service-oracle:1521/xepdb1"
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8500
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-back
+spec:
+  type: LoadBalancer
+  selector:
+    app: app-back
+  ports:
+    - port: 8500
+      targetPort: 8500

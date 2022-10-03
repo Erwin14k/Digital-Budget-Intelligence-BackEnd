@@ -1,13 +1,10 @@
-const guard = require('../sentinel/guard');
-const express = require('express');
+//const guard = require('../sentinel/guard');
+const express = require("express");
 const router = express.Router();
 
-const {
-    createAccount,
-    getAccounts,
-} = require('../controllers/account');
+const { createAccount, getAccounts } = require("../controllers/account");
 
-router.post('/account', guard, createAccount);
-router.get('/account', guard, getAccounts);
+router.post("/account", createAccount);
+router.get("/account", getAccounts);
 
 module.exports = router;
