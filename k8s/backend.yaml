@@ -21,13 +21,16 @@ spec:
             - name: ORACLE_USER
               value: "appuser"
             - name: ORACLE_PASS
-              value: "digitalbudget"
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: app-pass
             - name: ORACLE_CONNSTR
               value: "service-oracle:1521/xepdb1"
           resources:
             limits:
               memory: "128Mi"
-              cpu: "500m"
+              cpu: "150m"
           ports:
             - containerPort: 8500
 ---

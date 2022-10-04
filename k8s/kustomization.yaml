@@ -1,0 +1,17 @@
+namespace: fullstackapp
+
+resources:
+  - ns.yaml
+  - frontend.yaml
+  - backend.yaml
+  - database.yaml
+
+configMapGenerator:
+  - name: db-init-cm
+    files:
+      - init.sql
+
+secretGenerator:
+  - name: db-creds
+    envs:
+      - .env
